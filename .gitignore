@@ -1,0 +1,12 @@
+# Node.js
+node_modules/
+.env
+
+# React
+build/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
