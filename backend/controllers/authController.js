@@ -282,12 +282,7 @@ const login = asyncHandler(async (req, res) => {
       .cookie("session_id", refreshToken, {
         httpOnly: true,
         sameSite: "none",
-        domain:
-          process.env.NODE_ENV === "production"
-            ? 'https://bings-chat.onrender.com/'
-            : "localhost",
-
-        path: "/",
+       secure:true
       })
       .status(StatusCodes.OK)
       .json({ accessToken: accessToken, type: "success" });
