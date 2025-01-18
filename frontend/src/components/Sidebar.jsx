@@ -27,7 +27,7 @@ const Sidebar = () => {
 
   const getUnreadNotificationsCount = () => {
     // console.log(notifications.map(n => n.read));
-    return  0;
+    return notifications?.filter(n => !n.read).length || 0;
   };
 
   return (
@@ -65,13 +65,13 @@ const Sidebar = () => {
       </div>
 
       <div className="overflow-y-auto">
-      {chats?.length === 0 ? (
+      {chats.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-4 text-center">
             <Inbox className="w-24 h-24 mb-4 text-gray-400" /> 
             <h2 className="text-lg font-semibold">No Chats Found</h2>
             <p className="text-gray-500">Start a conversation by searching for users.</p>
           </div>
-        ) : (chats?.map((chat) => (
+        ) : (chats.map((chat) => (
           <button
             key={chat._id}
             onClick={() => {
