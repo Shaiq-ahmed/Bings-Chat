@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: import.meta.env.VITE_BACKEND_BASE_URL, // Your backend API URL
+        target: "https://bings-chat.onrender.com/", // Your backend API URL
         changeOrigin: true,
         secure: true,
       },
