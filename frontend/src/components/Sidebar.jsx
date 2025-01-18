@@ -27,7 +27,7 @@ const Sidebar = () => {
 
   const getUnreadNotificationsCount = () => {
     // console.log(notifications.map(n => n.read));
-    return notifications?.filter(n => !n.read).length || 0;
+    return  0;
   };
 
   return (
