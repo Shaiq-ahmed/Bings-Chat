@@ -65,7 +65,7 @@ const Sidebar = () => {
       </div>
 
       <div className="overflow-y-auto">
-      {chats.length === 0 ? (
+      {chats?.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-4 text-center">
             <Inbox className="w-24 h-24 mb-4 text-gray-400" /> 
             <h2 className="text-lg font-semibold">No Chats Found</h2>
