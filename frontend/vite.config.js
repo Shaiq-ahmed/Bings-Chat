@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import nodePolyfills from 'rollup-plugin-polyfill-node';
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
@@ -15,22 +15,23 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // Node.js built-in modules aliases
+      // Ensure compatibility for Node.js modules
       stream: 'rollup-plugin-polyfill-node/polyfills/stream',
       crypto: 'rollup-plugin-polyfill-node/polyfills/crypto',
       process: 'rollup-plugin-polyfill-node/polyfills/process',
       url: 'rollup-plugin-polyfill-node/polyfills/url',
       util: 'rollup-plugin-polyfill-node/polyfills/util',
       querystring: 'rollup-plugin-polyfill-node/polyfills/qs',
+      // Ensure React resolves correctly
+      react: require.resolve('react'),
+      'react-router': require.resolve('react-router'),
     },
   },
   optimizeDeps: {
     esbuildOptions: {
-      // Node.js global to browser globalThis
       define: {
         global: 'globalThis',
       },
-      // Enable esbuild polyfill plugins for development
       plugins: [
         NodeGlobalsPolyfillPlugin({
           process: true,  // Polyfill for `process`
@@ -41,12 +42,13 @@ export default defineConfig({
     },
   },
   build: {
+    sourcemap: false, // Disable sourcemaps to avoid build errors with `react-router`
     rollupOptions: {
-      // Enable rollup polyfills plugin during production bundling
       plugins: [nodePolyfills()],
     },
   },
 });
+
 
 
 // import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
