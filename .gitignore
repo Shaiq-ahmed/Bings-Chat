@@ -4,6 +4,7 @@ node_modules/
 
 # React
 build/
+dist
 
 # Logs
 *.log
