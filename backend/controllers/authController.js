@@ -49,31 +49,32 @@ async function generateTokens(user, req) {
     throw error;
   }
 }
-const sendVerificationEmailAndCreateToken = asyncHandler(async (req,userId, email, name) => {
-  const verificationToken = crypto.randomBytes(40).toString("hex");
+const sendVerificationEmailAndCreateToken = asyncHandler(
+  async (req, userId, email, name) => {
+    const verificationToken = crypto.randomBytes(40).toString("hex");
 
-  await EmailVerToken.create({
-    userId: userId,
-    token: verificationToken,
-  });
-  
-  try {
-    await sendVerificationEmail({
-      name: name, 
-      email: email,
-      verificationToken,
-      origin: `${req.protocol}://${req.get("host")}`, 
+    await EmailVerToken.create({
+      userId: userId,
+      token: verificationToken,
     });
-  } catch (error) {
-    await EmailVerToken.deleteOne({ token: verificationToken }); 
-    throw error; // Rethrow or handle as needed
-  }
 
-});
+    try {
+      await sendVerificationEmail({
+        name: name,
+        email: email,
+        verificationToken,
+        origin: `${req.protocol}://${req.get("host")}`,
+      });
+    } catch (error) {
+      await EmailVerToken.deleteOne({ token: verificationToken });
+      throw error; // Rethrow or handle as needed
+    }
+  }
+);
 
 const register = asyncHandler(async (req, res, next) => {
   try {
-    const { email, fullName:name, password } = req.body;
+    const { email, fullName: name, password } = req.body;
     if (!password) {
       return res.status(400).json({ error: "Please enter a password" });
     }
@@ -101,12 +102,10 @@ const register = asyncHandler(async (req, res, next) => {
     //   origin,
     // });
 
-    return res
-      .status(StatusCodes.CREATED)
-      .json({
-        msg: "Your account has been created, please login",
-        // msg: "Success! Please check your email to verify your account.",
-      });
+    return res.status(StatusCodes.CREATED).json({
+      msg: "Your account has been created, please login",
+      // msg: "Success! Please check your email to verify your account.",
+    });
   } catch (error) {
     console.error(error);
     next(error);
@@ -186,11 +185,9 @@ const resendVerificationEmail = asyncHandler(async (req, res) => {
       origin,
     });
 
-    return res
-      .status(StatusCodes.OK)
-      .json({
-        msg: "Verification email sent. Please check your email to verify your account.",
-      });
+    return res.status(StatusCodes.OK).json({
+      msg: "Verification email sent. Please check your email to verify your account.",
+    });
   } catch (error) {
     console.log(error);
     return res
@@ -236,19 +233,23 @@ const login = asyncHandler(async (req, res) => {
       if (tokenExists) {
         // Provide a message indicating a verification email has already been sent
         return res.status(StatusCodes.UNAUTHORIZED).json({
-          error: "Please verify your account, A verification email has already been sent. Please check your inbox.",
+          error:
+            "Please verify your account, A verification email has already been sent. Please check your inbox.",
           success: false,
           // Optionally, include a link or option to resend the email
         });
       } else {
         // No existing token, so send a verification email for the first time
-        await sendVerificationEmailAndCreateToken(req,user._id,user.email, user.name)
-        return res
-          .status(StatusCodes.OK)
-          .json({
-            msg: "A verification email has been sent. Please check your inbox.",
-            type:"verification_email_sent",
-          });
+        await sendVerificationEmailAndCreateToken(
+          req,
+          user._id,
+          user.email,
+          user.name
+        );
+        return res.status(StatusCodes.OK).json({
+          msg: "A verification email has been sent. Please check your inbox.",
+          type: "verification_email_sent",
+        });
       }
     }
 
@@ -278,10 +279,13 @@ const login = asyncHandler(async (req, res) => {
     );
 
     res
-      .cookie("session_id", refreshToken, { httpOnly: true,
-      sameSite: `none`, secure: process.env.NODE_ENV !== "development" })
+      .cookie("session_id", refreshToken, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: process.env.NODE_ENV === "production",
+      })
       .status(StatusCodes.OK)
-      .json({ accessToken: accessToken, type:"success" });
+      .json({ accessToken: accessToken, type: "success" });
   } catch (error) {
     console.log(error);
     res
@@ -412,12 +416,10 @@ const forgotPassword = asyncHandler(async (req, res) => {
   // Check if a token already exists for this user
   const existingToken = await PasswordVerToken.findOne({ email });
   if (existingToken) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({
-        error:
-          "A password reset token has already been sent to this email. Please check your email.",
-      });
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      error:
+        "A password reset token has already been sent to this email. Please check your email.",
+    });
   }
 
   const passwordToken = crypto.randomBytes(70).toString("hex");
@@ -477,9 +479,9 @@ const resetPassword = asyncHandler(async (req, res) => {
 
     await PasswordVerToken.findByIdAndDelete(userToken._id);
 
-    return res
-      .status(StatusCodes.OK)
-      .json({ msg: "Password has been reset successfully, you can now login with your new password." });
+    return res.status(StatusCodes.OK).json({
+      msg: "Password has been reset successfully, you can now login with your new password.",
+    });
   } catch (error) {
     console.error(error);
     return res
