@@ -2,7 +2,7 @@ import axios from "axios";
 import { toast } from 'react-hot-toast';
 
 export const axiosInstance = axios.create({
-  baseURL: import.meta.env.MODE === "development" ? import.meta.env.VITE_BACKEND_BASE_URL : "/api",
+  baseURL: import.meta.env.VITE_BACKEND_BASE_URL,
   withCredentials: true,
 });
 

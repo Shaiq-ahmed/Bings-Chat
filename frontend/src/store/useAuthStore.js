@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast from "react-hot-toast";
 import { useSocket } from '../SocketProvider';
 
-const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL || "https://gbm7hnwf-4001.inc1.devtunnels.ms/api/v1";
+const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 export const useAuthStore = create((set, get) => ({
   userProfile: null,
