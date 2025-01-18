@@ -45,6 +45,23 @@ const morgan = require('morgan');
 app.use(morgan('tiny'))
 app.use(express.json())
 app.use(cookieParser())
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "img-src 'self' data: https: http:",
+      "connect-src 'self' https://bings-chat.vercel.app  https://bings-chat.onrender.com/ wss:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self' data:",
+      "frame-src 'self'",
+      "media-src 'self'"
+    ].join('; ')
+  );
+  next();
+});
+
 
 app.use("/uploads/",  express.static(path.join(__dirname, "uploads")));
 
