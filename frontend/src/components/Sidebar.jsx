@@ -71,7 +71,7 @@ const Sidebar = () => {
             <h2 className="text-lg font-semibold">No Chats Found</h2>
             <p className="text-gray-500">Start a conversation by searching for users.</p>
           </div>
-        ) : (chats.map((chat) => (
+        ) : (chats?.map((chat) => (
           <button
             key={chat._id}
             onClick={() => {
