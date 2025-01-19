@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useCallback } from "react";
 import { useCallStore } from "../store/useCallStore";
 import { useSocket } from "../SocketProvider";
 import { useAuthStore } from "../store/useAuthStore";
@@ -18,10 +18,23 @@ export const CallProvider = ({ children }) => {
   const { userProfile } = useAuthStore();
   const callStore = useCallStore();
 
+  // Memoize the cleanup function
+  const cleanup = useCallback(() => {
+    if (socket) {
+      socket.off("callUser");
+      socket.off("callAccepted");
+      socket.off("callEnded");
+    }
+    // Don't call resetCallState here, as it might cause infinite updates
+  }, [socket]);
+
   useEffect(() => {
     if (!socket) return;
 
-    // Handle incoming call
+    const handleCallEnd = () => {
+      callStore.endCall();
+    };
+
     socket.on("callUser", ({ from, name, signal, type }) => {
       callStore.setIsReceivingCall(true);
       callStore.setCaller(from);
@@ -29,7 +42,6 @@ export const CallProvider = ({ children }) => {
       callStore.setCallType(type);
     });
 
-    // Handle call acceptance
     socket.on("callAccepted", (signal) => {
       callStore.setCallAccepted(true);
       const peer = callStore.peer;
@@ -38,18 +50,11 @@ export const CallProvider = ({ children }) => {
       }
     });
 
-    // Handle call end
-    socket.on("callEnded", () => {
-      callStore.endCall();
-    });
+    socket.on("callEnded", handleCallEnd);
 
-    return () => {
-      socket.off("callUser");
-      socket.off("callAccepted");
-      socket.off("callEnded");
-      callStore.resetCallState();
-    };
-  }, [socket, callStore]);
+    // Return cleanup function
+    return cleanup;
+  }, [socket, callStore, cleanup]);
 
   const contextValue = {
     ...callStore,
@@ -60,7 +65,9 @@ export const CallProvider = ({ children }) => {
     },
     endCall: () => {
       callStore.endCall();
-      socket.emit("endCall", { to: callStore.caller });
+      if (socket && callStore.caller) {
+        socket.emit("endCall", { to: callStore.caller });
+      }
     },
   };
 
@@ -70,12 +77,4 @@ export const CallProvider = ({ children }) => {
     </CallContext.Provider>
   );
 };
-
-
-
-
-
-
-
-
 

@@ -146,61 +146,63 @@ export const useCallStore = create((set, get) => ({
   endCall: () => {
     const { userStream, peer, remotePeerStream, ringtone } = get();
     
-    // Stop all tracks in user stream
-    if (userStream) {
-      userStream.getTracks().forEach(track => track.stop());
-    }
+    // Cleanup streams and peer in a single batch
+    const cleanup = () => {
+      if (userStream) {
+        userStream.getTracks().forEach(track => track.stop());
+      }
+      if (remotePeerStream) {
+        remotePeerStream.getTracks().forEach(track => track.stop());
+      }
+      if (peer) {
+        peer.destroy();
+      }
+      if (ringtone) {
+        stopCallRingtone(ringtone);
+      }
+    };
 
-    // Stop all tracks in remote stream
-    if (remotePeerStream) {
-      remotePeerStream.getTracks().forEach(track => track.stop());
-    }
-
-    // Destroy peer connection
-    if (peer) {
-      peer.destroy();
-    }
-
-    // Stop ringtone if it's playing
-    if (ringtone) {
-      stopCallRingtone(ringtone);
-    }
-
-    // Play end sound and reset state
+    // Execute cleanup
+    cleanup();
+    
+    // Play end sound
     playCallEndSound();
     
-    // Reset all state values
+    // Set state once, with all updates
     set({
-      ...initialState,
-      callEnded: true
+      isReceivingCall: false,
+      isCalling: false,
+      callAccepted: false,
+      callEnded: true,
+      caller: null,
+      callerSignal: null,
+      userStream: null,
+      callType: null,
+      peer: null,
+      remotePeerStream: null,
+      callStartTime: null,
+      ringtone: null
     });
-
-    // Reset call ended state after a short delay
-    setTimeout(() => {
-      set({ callEnded: false });
-    }, 100);
   },
 
   resetCallState: () => {
     const { userStream, peer, remotePeerStream, ringtone } = get();
     
+    // Cleanup resources without triggering state updates
     if (userStream) {
       userStream.getTracks().forEach(track => track.stop());
     }
-    
     if (remotePeerStream) {
       remotePeerStream.getTracks().forEach(track => track.stop());
     }
-    
     if (peer) {
       peer.destroy();
     }
-
     if (ringtone) {
       stopCallRingtone(ringtone);
     }
     
+    // Single state update
     set(initialState);
-  },
+  }
 }));
-
