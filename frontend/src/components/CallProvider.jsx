@@ -47,6 +47,7 @@ export const CallProvider = ({ children }) => {
       socket.off("callUser");
       socket.off("callAccepted");
       socket.off("callEnded");
+      callStore.resetCallState();
     };
   }, [socket, callStore]);
 

@@ -33,40 +33,12 @@ export const useCallStore = create((set, get) => ({
       set({ callAccepted });
     }
   },
-  setCallEnded: (callEnded) => {
-    if (callEnded) {
-      const { ringtone, userStream, peer } = get();
-      if (ringtone) {
-        stopCallRingtone(ringtone);
-      }
-      if (userStream) {
-        userStream.getTracks().forEach(track => track.stop());
-      }
-      if (peer) {
-        peer.destroy();
-      }
-      playCallEndSound();
-      set({ ...initialState });
-    } else {
-      set({ callEnded });
-    }
-  },
   setCaller: (caller) => set({ caller }),
   setCallerSignal: (callerSignal) => set({ callerSignal }),
   setUserStream: (userStream) => set({ userStream }),
   setCallType: (callType) => set({ callType }),
   setPeer: (peer) => set({ peer }),
   setRemotePeerStream: (remotePeerStream) => set({ remotePeerStream }),
-  resetCallState: () => {
-    const { userStream, peer } = get();
-    if (userStream) {
-      userStream.getTracks().forEach(track => track.stop());
-    }
-    if (peer) {
-      peer.destroy();
-    }
-    set(initialState);
-  },
 
   startRingtone: () => {
     const ringtone = playCallRingtone();
@@ -172,8 +144,63 @@ export const useCallStore = create((set, get) => ({
   },
 
   endCall: () => {
-    get().setCallEnded(true);
-    get().resetCallState();
+    const { userStream, peer, remotePeerStream, ringtone } = get();
+    
+    // Stop all tracks in user stream
+    if (userStream) {
+      userStream.getTracks().forEach(track => track.stop());
+    }
+
+    // Stop all tracks in remote stream
+    if (remotePeerStream) {
+      remotePeerStream.getTracks().forEach(track => track.stop());
+    }
+
+    // Destroy peer connection
+    if (peer) {
+      peer.destroy();
+    }
+
+    // Stop ringtone if it's playing
+    if (ringtone) {
+      stopCallRingtone(ringtone);
+    }
+
+    // Play end sound and reset state
+    playCallEndSound();
+    
+    // Reset all state values
+    set({
+      ...initialState,
+      callEnded: true
+    });
+
+    // Reset call ended state after a short delay
+    setTimeout(() => {
+      set({ callEnded: false });
+    }, 100);
+  },
+
+  resetCallState: () => {
+    const { userStream, peer, remotePeerStream, ringtone } = get();
+    
+    if (userStream) {
+      userStream.getTracks().forEach(track => track.stop());
+    }
+    
+    if (remotePeerStream) {
+      remotePeerStream.getTracks().forEach(track => track.stop());
+    }
+    
+    if (peer) {
+      peer.destroy();
+    }
+
+    if (ringtone) {
+      stopCallRingtone(ringtone);
+    }
+    
+    set(initialState);
   },
 }));
 

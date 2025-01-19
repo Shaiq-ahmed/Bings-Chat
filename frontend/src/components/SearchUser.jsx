@@ -8,7 +8,7 @@ const SearchUsers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const searchRef = useRef(null);
   const { searchUsers, searchResults, isSearching, clearSearchResults } = useUserStore();
-  const { selectedChat, accessChat } = useChatStore();
+  const { selectChat, accessChat } = useChatStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,10 +38,13 @@ const SearchUsers = () => {
 
   const handleUserSelect = async (userId) => {
     try {
-      await accessChat(userId);
-      navigate(`/chat/${selectedChat._id}`);
-      setSearchTerm('');
-      clearSearchResults();
+      const chat = await accessChat(userId);
+      if (chat) {
+        await selectChat(chat._id);
+        setSearchTerm('');
+        clearSearchResults();
+        navigate(`/chat/${chat._id}`);
+      }
     } catch (error) {
       console.error('Error accessing chat:', error);
     }

@@ -141,11 +141,14 @@ export const useChatStore = create((set, get) => ({
     try {
       const result = await axiosInstance.post('/chat', { userId });
       await get().selectChat(result.data.chat._id);
+      return result.data.chat;
     } catch (error) {
       console.error("Error accessing chat:", error);
       toast.error("Failed to access chat");
+      throw error; // Re-throw the error so it can be caught in the component
     }
   },
+
 
   getMoreMessages: async (chatId, offset = 0, limit = 20) => {
     const { isMessagesLoading } = get();

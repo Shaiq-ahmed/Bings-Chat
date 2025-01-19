@@ -2,35 +2,19 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useEffect } from 'react';
 import { Loader } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 const ProtectedRoute = () => {
   const { accessToken, userProfile, profile, isCheckingAuth } = useAuthStore();
   console.log(isCheckingAuth);
   useEffect(() => {
-    const checkAuth = async () => {
-      if (accessToken) {
-        try {
-          if (!userProfile) {
-            await profile();
-          }
-
-          if (!userProfile) {
-            toast.error('Session expired. Please log in again.');
-            return <Navigate to="/login" />;
-          }
-        } catch (error) {
-          toast.error('Session expired. Please log in again.');
-          return <Navigate to="/login" />;
-        }
-      } else {
-        toast.error('Session expired. Please log in again.');
-        return <Navigate to="/login" />;
-      }
+    if (accessToken && !userProfile) {
+      profile();
+      
+    }
+    else if (!accessToken) {
+      // If there's no access token, we're not authenticated, so we can stop checking
       useAuthStore.setState({ isCheckingAuth: false });
-    };
-
-    checkAuth();
+    }
   }, [accessToken, userProfile, profile]);
 
   if (isCheckingAuth && accessToken) {
@@ -41,7 +25,7 @@ const ProtectedRoute = () => {
     );
   }
 
-  return accessToken && userProfile ? <Outlet /> : <Navigate to="/login" />;
+  return accessToken ? <Outlet /> : <Navigate to="/login" />;
 };
 
 export default ProtectedRoute;
