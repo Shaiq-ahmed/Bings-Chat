@@ -8,7 +8,7 @@ const SearchUsers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const searchRef = useRef(null);
   const { searchUsers, searchResults, isSearching, clearSearchResults } = useUserStore();
-  const { selectChat } = useChatStore();
+  const { selectedChat, accessChat } = useChatStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,9 +38,8 @@ const SearchUsers = () => {
 
   const handleUserSelect = async (userId) => {
     try {
-      const chat = await selectChat(userId);
-      selectChat(chat._id);
-      navigate(`/chat/${chat._id}`);
+      await accessChat(userId);
+      navigate(`/chat/${selectedChat._id}`);
       setSearchTerm('');
       clearSearchResults();
     } catch (error) {

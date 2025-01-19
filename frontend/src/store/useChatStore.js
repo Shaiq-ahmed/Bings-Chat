@@ -137,6 +137,16 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  accessChat: async (userId) => {
+    try {
+      const result = await axiosInstance.post('/chat', { userId });
+      await get().selectChat(result.data.chat._id);
+    } catch (error) {
+      console.error("Error accessing chat:", error);
+      toast.error("Failed to access chat");
+    }
+  },
+
   getMoreMessages: async (chatId, offset = 0, limit = 20) => {
     const { isMessagesLoading } = get();
     if (isMessagesLoading) return;
