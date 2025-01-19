@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+} from "react";
 import { useCallStore } from "../store/useCallStore";
 import { useSocket } from "../SocketProvider";
 import { useAuthStore } from "../store/useAuthStore";
@@ -59,7 +64,13 @@ export const CallProvider = ({ children }) => {
   const contextValue = {
     ...callStore,
     callUser: (userId, type) =>
-      callStore.callUser(userId, type, socket, userProfile._id, userProfile.name),
+      callStore.callUser(
+        userId,
+        type,
+        socket,
+        userProfile._id,
+        userProfile.name
+      ),
     answerCall: () => {
       callStore.answerCall(socket);
     },
@@ -72,9 +83,6 @@ export const CallProvider = ({ children }) => {
   };
 
   return (
-    <CallContext.Provider value={contextValue}>
-      {children}
-    </CallContext.Provider>
+    <CallContext.Provider value={contextValue}>{children}</CallContext.Provider>
   );
 };
-
